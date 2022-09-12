@@ -1,0 +1,63 @@
+
+insert into DIM_ORG_BUSINESS_UNIT_python_IN1542
+SELECT
+a.[ORG_ID],
+a.[SRC_ORG_CD],
+a.[ORG_TYPE_ID],
+a.[ORG_NM],
+a.[PARENT_ORG_ID],
+a.[PARENT_ORG_NM],
+a.[WM_RDC_NUM],
+a.[WM_STORE_NUM],
+a.[WM_DSTRBTR_NO],
+a.[WH_IND],
+a.[DSV_IND],
+a.[ACTV_IND],
+a.[EFF_BEGIN_DT],
+a.[EFF_END_DT],
+a.[CRE_DT],
+1 as Is_Valid_Flag,
+a.[UPD_TS]
+
+
+FROM stg_DIM_ORG_BUSINESS_UNIT_python_IN1542 a LEFT join DIM_ORG_BUSINESS_UNIT_python_IN1542 t
+ ON a.[ORG_ID]=t.[ORG_ID]
+WHERE t.[ORG_ID] IS NULL or ((  
+    
+    t.ORG_NM!=a.ORG_NM or
+    t.PARENT_ORG_ID!=a.PARENT_ORG_ID or
+    t. PARENT_ORG_NM!=a. PARENT_ORG_NM or
+    t.WM_RDC_NUM!=a.WM_RDC_NUM or
+    t.WM_STORE_NUM!=a.WM_STORE_NUM  or
+    t.WM_DSTRBTR_NO!=a.WM_DSTRBTR_NO
+    
+    
+    
+    
+    )
+    
+    
+    
+    and t.[Is_Valid_Flag]= 1)
+
+UPDATE DIM_ORG_BUSINESS_UNIT_python_IN1542
+SET Is_Valid_Flag= 0
+FROM stg_DIM_ORG_BUSINESS_UNIT_python_IN1542 a left JOIN DIM_ORG_BUSINESS_UNIT_python_IN1542 t
+ON a.[ORG_ID]=t.[ORG_ID]
+WHERE (  
+    
+    t.ORG_NM!=a.ORG_NM or
+    t.PARENT_ORG_ID!=a.PARENT_ORG_ID or
+    t.PARENT_ORG_NM!=a. PARENT_ORG_NM or
+    t.WM_RDC_NUM!=a.WM_RDC_NUM or
+    t.WM_STORE_NUM!=a.WM_STORE_NUM  or
+    t.WM_DSTRBTR_NO!=a.WM_DSTRBTR_NO
+    
+    
+     
+    
+    ) and  t.[Is_Valid_Flag]= 1
+    
+
+    
+				
