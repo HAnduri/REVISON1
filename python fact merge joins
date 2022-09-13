@@ -1,0 +1,62 @@
+import utils
+import pandas as pd
+from datetime import datetime
+
+def main():
+    conn,cursor = utils.create_conn()
+    
+    src_query = ''' select * from [BCMPWMT].[ORDER_LINE_CHRG]'''
+    
+    src_df = pd.read_sql(src_query,conn)
+    
+    src_df    
+    fact_query = '''select * from FACT_ORDER_LINE_CHRG_PY_IN1552'''
+    
+    fact_df = pd.read_sql(fact_query,conn)
+    
+    fact_df
+    
+    charg_cat_query = ''' select * from DIM_CHARGE_CATEG_Py_IN1552'''
+    
+    charg_cat_df = pd.read_sql(charg_cat_query,conn)
+    
+    charg_cat_df
+
+    date_query = '''select * from dim_day_SQL_IN1552'''
+    
+    date_df = pd.read_sql(date_query,conn)
+    
+    date_df['Date_id'] = pd.to_datetime(date_df['Date_id']).dt.date
+    src_df['CHRG_CRE_DT'] = pd.to_datetime(src_df['CHRG_CRE_DT']).dt.date
+    
+  
+
+
+
+    new_mrg_table = pd.merge(src_df,date_df,how= 'left',left_on = 'CHRG_CRE_DT',right_on='Date_id')
+    
+    new_mrg_table
+    new_mrg_table['CHARGE_CATEG_ID'] = new_mrg_table['CHARGE_CATEG_ID'].astype(int)
+    charg_cat_df['CHARGE_CATEG_ID'] = charg_cat_df['CHARGE_CATEG_ID'].astype(int)
+    
+    final_mrg_table = pd.merge(new_mrg_table,charg_cat_df,how= 'left',left_on = 'CHARGE_CATEG_ID',right_on='CHARGE_CATEG_ID')
+   # final_mrg_table = pd.concat([new_mrg_table,charg_cat_df],axis =1,join = 'outer')
+    final_mrg_table
+
+    fact_df['SALES_ORDER_NUM'] = src_df['SALES_ORDER_NUM'].replace(("NULL","?"),101).astype('int64').fillna(101)
+    fact_df['SALES_ORDER_LINE_NUM'] = src_df['SALES_ORDER_LINE_NUM'].replace(("NULL","?"),101).astype(int).fillna(101)
+    fact_df['TENANT_ORG_ID'] = src_df['TENANT_ORG_ID'].replace(("NULL","?"),101).astype(int).fillna(101)
+    fact_df['CHARGE_CATEG_ID'] = src_df['CHARGE_CATEG_ID'].replace(("NULL","?"),101).astype(int).fillna(101)
+    fact_df['CHRG_CATEG_MAP_ID'] = src_df['CHRG_CATEG_MAP_ID'].replace(("NULL","?"),101).astype(int).fillna(101)
+    fact_df['CHARGE_NM'] = src_df['CHARGE_NM'].str.strip().replace(('NULL','?'),'N/A').fillna('N/A')
+    fact_df['CHARGE_AMT'] = src_df['CHARGE_AMT'].replace(('NULL',"?"),0).astype(float).fillna(0)
+    fact_df['CHRG_CRE_DT'] = pd.to_datetime(src_df['CHRG_CRE_DT'])
+    fact_df['CHRG_QTY'] = src_df['CHRG_QTY'].replace(("NULL",'?'),0).astype(float).fillna(0)
+    fact_df['CHRG_CRE_DT_KEY'] = final_mrg_table['Day_key']
+    fact_df['charge_categ_key'] = final_mrg_table['Charge_categ_Key']
+    
+    fact_df    
+    
+    
+    
+    
