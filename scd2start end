@@ -1,0 +1,80 @@
+  
+    scd_2_cust=  ''' insert into  dim_cust_address_python_IN1542
+ select 
+a.[ADDR_ID],
+a.[TENANT_ORG_ID],
+a.[DATA_SRC_ID],
+a.[VALID_TS],
+a.[VALID_STS],
+a.[CITY],
+a.[MUNICIPALITY],
+a.[TOWN],
+a.[VILLAGE],
+a.[COUNTY],
+a.[DISTRICT],
+a.[ZIP_CD],
+a.[POSTAL_CD],
+a.[ZIP_EXTN],
+a.[ADDR_TYPE],
+a.[AREA],
+a.[CNTRY_CD],
+a.[STATE_PRVNCE_TYPE],
+a.[OWNER_ID],
+a.[PARENT_ID],
+a.[DELTD_YN],
+a.[Start_Date],
+a.[End_Date],
+a.[CRE_DT],
+a.[CRE_USER],
+a.[UPD_TS],
+a.[UPD_USER]
+
+
+
+
+ from stg_dim_cust_address_python_IN1542 a left join  dim_cust_address_python_IN1542 b
+on a.[ADDR_ID]=b.[ADDR_ID]
+where b.[ADDR_ID] IS NULL or(b.[END_DATE] is null and (b.[CITY]<>a.[CITY] OR b.[MUNICIPALITY]<>a.[MUNICIPALITY] 
+                                                        OR b.[TOWN]<>a.[TOWN]
+                                                        or b.[VILLAGE]<>a.[VILLAGE] OR b.[COUNTY]<>a.[COUNTY]
+                                                        OR b.[DISTRICT]<>a.[DISTRICT]
+                              OR b.[ZIP_CD]<>a.[ZIP_CD]
+                              or b.[POSTAL_CD]<>a.[POSTAL_CD] OR b.[ZIP_EXTN]<>a.[ZIP_EXTN]
+                              OR b.[ADDR_TYPE]<>a.[ADDR_TYPE]
+                                     OR b.[AREA]<>a.[AREA]
+                                     or b.[CNTRY_CD]<>a.[CNTRY_CD] OR b.[STATE_PRVNCE_TYPE]<>a.[STATE_PRVNCE_TYPE]
+                                     OR b.[OWNER_ID]<>a.[OWNER_ID] or b.[PARENT_ID]<>a.[PARENT_ID]    ) ) 
+                                     
+                              
+                              
+  
+                                 
+                              
+                              
+                              
+                              
+                              
+              update  dim_cust_address_python_IN1542
+              SET end_date=getdate()
+               from stg_dim_cust_address_python_IN1542  a left join  dim_cust_address_python_IN1542 b
+              on  a.[ADDR_ID]=b.[ADDR_ID]
+              where b.[END_DATE] is null and (b.[CITY]<>a.[CITY] OR b.[MUNICIPALITY]<>a.[MUNICIPALITY] 
+                                                                      OR b.[TOWN]<>a.[TOWN]
+                                                                      or b.[VILLAGE]<>a.[VILLAGE] OR b.[COUNTY]<>a.[COUNTY]
+                                                                      OR b.[DISTRICT]<>a.[DISTRICT]
+                                            OR b.[ZIP_CD]<>a.[ZIP_CD]
+                                            or b.[POSTAL_CD]<>a.[POSTAL_CD] OR b.[ZIP_EXTN]<>a.[ZIP_EXTN]
+                                            OR b.[ADDR_TYPE]<>a.[ADDR_TYPE]
+                                                   OR b.[AREA]<>a.[AREA]
+                                                   or b.[CNTRY_CD]<>a.[CNTRY_CD] OR b.[STATE_PRVNCE_TYPE]<>a.[STATE_PRVNCE_TYPE]
+                                                   OR b.[OWNER_ID]<>a.[OWNER_ID] or b.[PARENT_ID]<>a.[PARENT_ID]   )  
+
+                
+                              
+                              
+                              '''
+
+    cursor.execute(scd_2_cust)
+    conn.commit()
+    
+    
