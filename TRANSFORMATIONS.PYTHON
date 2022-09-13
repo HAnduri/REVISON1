@@ -22,5 +22,8 @@ ParserError: Unknown string format: PG_CTLG
 ---------------------------------------------
 DataError: ('22003', '[22003] [Microsoft][SQL Server Native Client 11.0]Numeric value out of range (0) (SQLExecute)')
  float columns in the df and check the decimal precision. we need to round it off to match the STG table structure
- 
+ --------------------------------------------------------------------------------------------------
+    DataError: ('22003', '[22003] [Microsoft][SQL Server Native Client 11.0]Numeric value out of range (0) (SQLExecute)')
+    
+    int to bigint 
     
