@@ -19,5 +19,8 @@ ParserError: Unknown string format: PG_CTLG
  -----------------------------------------------------
   df['UPD_TS'] = pd.to_datetime(df['UPD_TS'].apply(lambda x: x if not re.match('[a-zA-z]',str(x)) else '01-01-1900').fillna('01-01-1900'), infer_datetime_format=True)
 
-
+---------------------------------------------
+DataError: ('22003', '[22003] [Microsoft][SQL Server Native Client 11.0]Numeric value out of range (0) (SQLExecute)')
+ float columns in the df and check the decimal precision. we need to round it off to match the STG table structure
+ 
     
