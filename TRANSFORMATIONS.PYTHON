@@ -1,0 +1,4 @@
+    df['START_PRICE'] = df['START_PRICE'].apply(lambda x:x if not re.match('[A-Z]',str(x)) else '0').replace('NULL',0).fillna(0).astype('float')
+        df['START_PRICE'] = df['START_PRICE'].apply(lambda x:x if not re.match('[A-Z]',str(x)) else '0').replace('NULL',0).fillna(0).astype('float')
+         df['CATLG_ITEM_ID'] = df['CATLG_ITEM_ID'].str.strip().replace('NULL',101).astype('float64').fillna(101)
+          df['CATLG_ITEM_ID'] = df['CATLG_ITEM_ID'].str.strip().replace('NULL',101).astype('float64').fillna(101)
