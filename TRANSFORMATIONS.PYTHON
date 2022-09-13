@@ -3,3 +3,21 @@
          df['CATLG_ITEM_ID'] = df['CATLG_ITEM_ID'].str.strip().replace('NULL',101).astype('float64').fillna(101)
           df['CATLG_ITEM_ID'] = df['CATLG_ITEM_ID'].str.strip().replace('NULL',101).astype('float64').fillna(101)
     df['BASE_SUGG_PRICE'] = df['BASE_SUGG_PRICE'].apply(pd.to_numeric, errors='coerce').fillna(0).astype('float')
+    --------------------------
+ValueError: invalid literal for int() with base 10: '90.0500000'
+    df['TAXABLE_IND'] = df['TAXABLE_IND'].replace('NULL',101).astype(float).astype('int').fillna(101)
+    --------------------------------------------------------
+    ValueError: invalid literal for int() with base 10: 'II66OJTVwU5416'
+  df['SHIPTOSTORE_IND'] = df['SHIPTOSTORE_IND'].apply(pd.to_numeric, errors='coerce').fillna(101).astype('int64')
+  --------------------------------------------------------------------------
+  ValueError: invalid literal for int() with base 10: 'NULL'
+      df['PIP_IND'] = df['PIP_IND'].replace(('NULL','?'),101).astype('int').fillna(101)
+      ------------------------------------------------
+      
+ParserError: Unknown string format: PG_CTLG
+ df['UPD_TS'] = pd.to_datetime(df['UPD_TS'].apply(pd.to_datetime, errors='coerce').replace('NULL','01-01-1900 00:00:00')).fillna('01-01-1900 00:00:00') 
+ -----------------------------------------------------
+  df['UPD_TS'] = pd.to_datetime(df['UPD_TS'].apply(lambda x: x if not re.match('[a-zA-z]',str(x)) else '01-01-1900').fillna('01-01-1900'), infer_datetime_format=True)
+
+
+    
