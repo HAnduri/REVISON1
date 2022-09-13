@@ -1,0 +1,148 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Sep 13 15:08:56 2022
+
+@author: HAnduri
+"""
+
+import utils
+import pandas as pd
+import datetime
+import re
+
+
+def main():
+    
+    conn,cursor= utils.create_conn()
+    
+    
+    src_query='''
+    select * from BCMPWMT.SALES_ORDER_ADJ
+
+    '''
+    src_date='''select * from DIM_DAY_HOUR_sql_IN1542'''
+    
+    src = pd.read_sql(src_query,conn)
+    src1 = pd.read_sql(src_date,conn)
+    
+    
+    df = pd.DataFrame()
+
+    
+    df['ADJ_ID']=src['ADJ_ID'].replace(('NULL','?'),(101,101)).fillna(101).astype('str')
+    df['SALES_ORDER_NUM']=src['SALES_ORDER_NUM'].replace(('NULL','?'),(101,101)).fillna(101).astype('int64')
+    df['SALES_ORDER_LINE_NUM']=src['SALES_ORDER_LINE_NUM'].replace(('NULL','?'),(101,101)).fillna(101).astype('int')
+    df['TENANT_ORG_ID']=src['TENANT_ORG_ID'].replace(('NULL','?'),(101,101)).fillna(101).astype('int')
+    df['CHARGE_CATEG_ID']=src['CHARGE_CATEG_ID'].replace(('NULL','?'),(101,101)).fillna(101).astype('int')
+    df['CHRG_CATEG_MAP_ID']=src['CHRG_CATEG_MAP_ID'].replace(('NULL','?'),(101,101)).fillna(101).astype('int')
+    df['CHRG_NM']=src['CHRG_NM'].replace(('NULL','?'),('N/A','N/A')).str.strip().fillna('N/A')
+    df['RSN_CD']=src['RSN_CD'].apply(lambda x: x if not re.match('[a-zA-z]',str(x)) else 101).replace(('NULL','?'),(101,101)).fillna(101).astype('int')
+    df['QTY']=src['QTY'].replace(('NULL','?'),(0,0)).fillna(0).astype('int')
+    df['ADJUSMENT_AMT']=src['ADJUSMENT_AMT'].replace(('NULL','?'),(0,0)).fillna(0).astype('float')
+    df['ADJ_RPT_TS']=pd.to_datetime(src['ADJ_RPT_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00')
+    df['a_date']=pd.to_datetime(src['ADJ_RPT_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00').dt.date
+    df['a_hour']=pd.to_datetime(src['ADJ_RPT_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00').dt.hour
+    df['RTN_IND']=src['RTN_IND'].replace(('NULL','?'),(101,101)).fillna(101).astype('int')
+    df['RTN_TS']=pd.to_datetime(src['RTN_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00')
+    df['rtn_date']=pd.to_datetime(src['RTN_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00').dt.date
+    df['rtn_hour']=pd.to_datetime(src['RTN_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00').dt.hour
+    df['XCHNG_IND']=src['XCHNG_IND'].replace(('NULL','?'),(101,101)).fillna(101).astype('int')
+    df['RFND_TS']=pd.to_datetime(src['RFND_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00')
+    df['rfnd_date']=pd.to_datetime(src['RFND_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00').dt.date
+    df['rfnd_hour']=pd.to_datetime(src['RFND_TS'].replace(('NULL','?'),('01-01-1900 00:00:00','01-01-1900 00:00:00')),infer_datetime_format=True).fillna('01-01-1900 00:00:00').dt.hour
+    
+    
+    main_src = pd.merge(df,src1, left_on = ['a_date','a_hour'], right_on = ['Date_id','hour_id'], how = 'left')
+    main_src_1 = pd.merge(df,src1, left_on = ['rtn_date','rtn_hour'], right_on = ['Date_id','hour_id'], how = 'left')
+    main_src_2 = pd.merge(df,src1, left_on = ['rfnd_date','rfnd_hour'], right_on = ['Date_id','hour_id'], how = 'left')
+    
+# =============================================================================
+#     (
+# ADJ_ID	 varchar(50)    PRIMARY KEY         ,
+# SALES_ORDER_NUM	BIGINT          ,
+# SALES_ORDER_LINE_NUM	INT     ,
+# TENANT_ORG_ID	INT             ,
+# CHARGE_CATEG_ID	INT             ,
+# CHRG_CATEG_MAP_ID	INT         ,
+# CHRG_NM	varchar(50)             ,
+# RSN_CD	INT                     ,
+# QTY	int                         ,
+# ADJUSMENT_AMT	float           ,
+# ADJ_RPT_TS	DATETIME            ,
+# RTN_IND	int                     ,
+# RTN_TS	DATETIME                ,
+# XCHNG_IND	int                 ,
+# ADJ_RPT_TS_KEY	int             ,
+# RTN_TS_KEY	int                 ,
+# RFND_TS_KEY	int                 ,
+# RFND_TS	DATETIME           )     
+#     
+# =============================================================================
+    
+    
+    
+    
+    
+    df['a_day_hour_key'] = main_src['Day_hour_key'].fillna(-1)
+    df['rtn_day_hour_key'] = main_src_1['Day_hour_key'].fillna(-1)
+    df['rfnd_day_hour_key'] = main_src_2['Day_hour_key'].fillna(-1)
+    
+    cursor.fast_executemany = True
+    insert_to_tmp_tbl_stmt='''insert into stg_FACT_sales_order_adj_python_IN1542
+     values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+    collist=['ADJ_ID', 'SALES_ORDER_NUM', 'SALES_ORDER_LINE_NUM', 'TENANT_ORG_ID',
+           'CHARGE_CATEG_ID', 'CHRG_CATEG_MAP_ID', 'CHRG_NM', 'RSN_CD', 'QTY',
+           'ADJUSMENT_AMT', 'ADJ_RPT_TS', 'RTN_IND', 'RTN_TS',
+           'XCHNG_IND', 'a_day_hour_key', 
+           'rtn_day_hour_key', 'rfnd_day_hour_key','RFND_TS']
+    cursor.executemany(insert_to_tmp_tbl_stmt, df[collist].values.tolist())
+  
+    conn.commit()
+    
+    tgt_table='''insert into FACT_sales_order_adj_python_IN1542
+    select ADJ_ID, SALES_ORDER_NUM, SALES_ORDER_LINE_NUM, TENANT_ORG_ID,
+    CHARGE_CATEG_ID, CHRG_CATEG_MAP_ID, CHRG_NM, RSN_CD, QTY,
+    ADJUSMENT_AMT, ADJ_RPT_TS, RTN_IND, RTN_TS,
+    XCHNG_IND, ADJ_RPT_TS_KEY, 
+    RTN_TS_KEY, RFND_TS_KEY, RFND_TS
+    from stg_fact_sales_order_adj_PYTHON_IN1542'''
+    
+    cursor.execute(tgt_table)
+    conn.commit()
+    
+    alter_table = '''alter TABLE FACT_sales_order_adj_python_IN1542 add charge_categ_key INT,
+    Rsn_cd_KEY INT'''
+    
+    cursor.execute(alter_table)
+    conn.commit()
+    
+    update_1='''UPDATE FACT_sales_order_adj_python_IN1542 SET charge_categ_key=D.CHARGE_CATEG_KEY
+    FROM FACT_sales_order_adj_python_IN1542 F LEFT JOIN DIM_CHARGE_CATEG_PYTHON_IN1542 D ON
+    D.CHARGE_CATEG_ID=F.charge_categ_id'''
+    
+    cursor.execute(update_1)
+    conn.commit()
+    
+    update_2 = '''UPDATE FACT_sales_order_adj_python_IN1542 SET RSN_CD_KEY=D.RSN_KEY
+    FROM fact_sales_order_adj_PYTHON_IN1542 F LEFT JOIN dim_RSN_LKP_python_IN1542 D ON
+    D.RSN_CD=F.RSN_CD'''
+    
+    cursor.execute(update_2)
+    conn.commit()
+    
+    null_handler = '''update FACT_sales_order_adj_python_IN1542 set charge_categ_key = iif(charge_categ_key is null,101,charge_categ_key),
+    Rsn_cd_KEY = iif(Rsn_cd_KEY is null,101,Rsn_cd_KEY)'''
+    
+    cursor.execute(null_handler)
+    conn.commit()
+    
+    
+    cursor.close()
+    conn.close()
+    
+    
+if __name__=='__main__':
+    main()
+    
+    
+    
